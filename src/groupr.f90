@@ -234,6 +234,7 @@ contains
    !     21           tripoli 315-group structure
    !     22           xmas lwpc 172-group structure
    !     23           vit-j lwpc 175-group structure
+   !     24           sand-iv 770-group structure 
    !
    !     igg          meaning
    !     ---          -------
@@ -1573,6 +1574,7 @@ contains
    use util   ! provides error
    ! internals
    integer::lflag,ig,ngp,n1,n2,n,i,ic
+   integer::ngp_hold
    real(kr)::u,du,delta
    real(kr),dimension(241),parameter::gl2=(/&
      27.631e0_kr,17.0e0_kr,16.75e0_kr,16.588e0_kr,16.5e0_kr,16.3e0_kr,&
@@ -2487,6 +2489,7 @@ contains
    real(kr),parameter::sandc=2.8e-4_kr
    real(kr),parameter::sandd=1.e6_kr
    real(kr),parameter::sande=1.e5_kr
+   real(kr),parameter::sandf=1.e6_kr
    real(kr),parameter::uu80=.6931472e0_kr
    real(kr),parameter::e175=1.284e7_kr
 
@@ -2630,8 +2633,9 @@ contains
       enddo
 
    !--sand-ii 620- and 640-group structures
-   else if (ign.eq.12.or.ign.eq.15) then
+   else if (ign.eq.12.or.ign.eq.15 .or. ign.eq.24) then
       ngn=620
+      if (ign.eq.24) ngn=770
       if (ign.eq.15) ngn=640
       ngp=ngn+1
       allocate(egn(ngp))
@@ -2653,9 +2657,15 @@ contains
       enddo
       ! groups 451 through 620 have constant spacing of 1.e5
       egn(451)=sandd
-      do i=452,ngp
+      ngp_hold = min(ngp,641)
+      do i=452,ngp_hold 
          egn(i)=egn(i-1)+sande
       enddo
+      if ( ngp.eq. 771) then
+          do i=642,ngp                                                                     
+             egn(i)=egn(i-1)+sandf                                                         
+          enddo   
+      endif
 
    !--lanl 80-group structure
    else if (ign.eq.13) then
@@ -2831,6 +2841,8 @@ contains
      &  '' neutron group structure......xmas lwpc 172-group'')')
    if (ign.eq.23) write(nsyso,'(/&
      &  '' neutron group structure......vit-j lwpc 175-group'')')
+   if (ign.eq.24) write(nsyso,'(/&                                                     
+   &  '' neutron group structure......SAND-IV 770-group'')')   
    do ig=1,ngn
       write(nsyso,'(1x,i5,2x,1p,e12.5,''  - '',e12.5)')&
         ig,egn(ig),egn(ig+1)
